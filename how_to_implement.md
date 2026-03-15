@@ -26,6 +26,18 @@ Bu doküman, `todo.md` dosyasında listelenen hedeflerin teknik olarak kod ve Un
 
 ---
 
+## 1.5 Hierarchy ve Inspector Kurulumu (Agent Referansı)
+1. **NetworkManager Prefab'ı:**
+   - Boş bir obje oluşturulacak (İsim: `NetworkManager`).
+   - İçine `NetworkManager` bileşeni eklenecek.
+   - İçine `Tugboat` (LAN) bileşeni eklenecek.
+   - İçine `FishyEOS` (Online) bileşeni eklenecek ve Epic Portal'dan alınan kimlikler (Product ID, Sandbox ID) buraya girilecek.
+   - `PlayerSpawner` bileşeni eklenip `NetworkManager`'a bağlanacak.
+2. **OnlineSystemController:**
+   - Boş bir obje (veya Manager objesinin alt objesi) oluşturulacak.
+   - Kodladığımız `NetworkConnectionManager`, `SplitScreenManager` ve `MainMenuManager` scriptleri buraya atılacak.
+   - Her scriptin inspector üzerindeki referansları birbirlerine (Tugboat, FishyEOS, UI Panelleri) sürüklenecek.
+
 ## 2. Temel Arayüz (UI) ve Bağlantı Mantığı (Connection Logic)
 
 1. **Canvas Düzeni:** Sahneye bir Canvas eklenip ortasına "Online Bağlan (EOS)", "Yerel Ağ (LAN)" ve "Bölünmüş Ekran (Split-Screen)" butonları eklenecek.
