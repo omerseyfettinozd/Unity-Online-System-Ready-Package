@@ -78,14 +78,9 @@ namespace OnlineSystemReady.Player
         {
             if (base.IsOwner)
             {
-                Reconciliation(default, false); // Check for server corrections
+                Reconciliation(default, Channel.Unreliable); // Check for server corrections
                 MoveData data = new MoveData { MoveInput = _currentMoveInput };
-                Move(data, false); // Send input to server & predict locally
-            }
-
-            if (base.IsServer)
-            {
-                Move(default, true); // Server processes incoming inputs
+                Move(data); // Send input to server & predict locally
             }
         }
 
@@ -97,12 +92,12 @@ namespace OnlineSystemReady.Player
                 Position = transform.position,
                 Rotation = transform.rotation
             };
-            Reconciliation(data, true, Channel.Unreliable);
+            Reconciliation(data, Channel.Unreliable);
         }
 
         // --- REPLICATE (Movement Logic) --- //
         [Replicate]
-        private void Move(MoveData data, bool asServer, Channel channel = Channel.Unreliable, bool replaying = false)
+        private void Move(MoveData data, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
         {
             if (_characterController == null) return;
 
@@ -121,7 +116,7 @@ namespace OnlineSystemReady.Player
 
         // --- RECONCILE (Correction Logic) --- //
         [Reconcile]
-        private void Reconciliation(ReconcileData data, bool asServer, Channel channel = Channel.Unreliable)
+        private void Reconciliation(ReconcileData data, Channel channel = Channel.Unreliable)
         {
             // If the server tells us we are at a different place, we snap to it.
             transform.position = data.Position;
