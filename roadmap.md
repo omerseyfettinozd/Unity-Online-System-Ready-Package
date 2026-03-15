@@ -4,9 +4,9 @@
 - **Hedef:** Unity 6000.3.9f1 sürümüne uygun ağ mimarisinin seçilmesi ve projeye entegrasyonu.
 - **Çıktı:** Bağlantı kurulabilen boş bir sahne ve bağımsız (modüler) çalışan bir ağ yöneticisi sistemi.
 
-## Faz 2: Çekirdek Ağ Senkronizasyonu (Phase 2: Core Sync)
-- **Hedef:** Bir ağ oturumu (Host/Client) başlatabilme, oyuncu (Player) nesnesinin ağ üzerinde oluşturulması (Spawning) ve hareket senkronizasyonu.
-- **Çıktı:** Birden fazla istemcinin bağlanabildiği, oyuncuların birbirini görebildiği ve hareketlerin eşitlendiği temel proje.
+## Faz 2: Çekirdek Ağ Senkronizasyonu ve Çoklu Erişim (Phase 2: Core Sync & Access)
+- **Hedef:** İnternet üzerinden (EOS), Yerel Ağ üzerinden (LAN) veya aynı bilgisayarda bölünmüş ekran (Split-Screen) olarak bağlantı kurulabilmesi. Oyuncu nesnesinin ağ üzerinde oluşturulması ve hareket senkronizasyonu.
+- **Çıktı:** Farklı bağlantı tiplerinde de (Online/LAN/Local) sorunsuz çalışan oyuncu oluşturma (Spawning) ve hareket sistemi.
 
 ## Faz 3: Modülerlik ve Gelişmiş Özellikler (Phase 3: Modularity)
 - **Hedef:** Sistemin herhangi bir spesifik oyuna (RPG, FPS vb.) bağlı olmadan, jenerik bir "Ağ Çekirdeği (Network Core)" haline getirilmesi. Objeler arası etkileşim (RPC/SyncVar vb.) için örnek script'ler oluşturulması.

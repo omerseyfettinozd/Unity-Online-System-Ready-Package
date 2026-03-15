@@ -27,8 +27,19 @@ Bu doküman, `todo.md` dosyasında listelenen hedeflerin teknik olarak kod ve Un
 
 ## 2. Temel Arayüz (UI) ve Bağlantı Mantığı (Connection Logic)
 
-1. **Canvas Düzeni:** Sahneye bir Canvas eklenip ortasına "Host (Server+Client)" ve "Join (Client)" butonları eklenecek.
-2. **NetworkConnectionController.cs:** Bu adla oluşturulacak script, "Host" butonuna basıldığında FishNet'in `InstanceFinder.ServerManager.StartConnection()` methodunu, "Join" için `InstanceFinder.ClientManager.StartConnection()` methodunu (EOS lobi ID'sine veya P2P koduna/şifresine bağlanarak) çağıracak. Script `NetworkManager`'a bağlanıp prefab güncellenecek.
+1. **Canvas Düzeni:** Sahneye bir Canvas eklenip ortasına "Online Bağlan (EOS)", "Yerel Ağ (LAN)" ve "Bölünmüş Ekran (Split-Screen)" butonları eklenecek.
+2. **NetworkConnectionController.cs (Çoklu Ağ Yöneticisi):**
+   - Bu script, FishNet'in `NetworkManager` referansını tutacak.
+   - **LAN Modu:** Seçildiğinde, FishNet'in "Transport Manager" özelliği kullanılarak aktif transport `Tugboat` (FishNet'in yerel ağ transportu) olarak değiştirilecek ve ardından `StartConnection()` çağrılacak. IP adresi "localhost" veya yerel IP olacak.
+   - **Online Modu (EOS):** Seçildiğinde, aktif transport `FishyEOS` olarak değiştirilip Epic sunucularına bağlanılacak.
+   - **Split-Screen Modu:** Bu modda ağ bağlantısı başlatılmaz (veya gizli arka plan Host'u açılır). Oyuna sadece ikinci bir lokal Player Prefab'ı eklenir.
+
+## 2.5 Split-Screen (Bölünmüş Ekran) ve Local Co-Op Altyapısı
+1. **Input System:** Unity'nin yeni (veya eski) Input System'i kullanılarak `Player 1` (WASD) ve `Player 2` (Yön Tuşları veya Gamepad) ayrımları yapılacak.
+2. **Kamera Bölme:** Oyuncu prefab'ı doğduğunda (Spawn), eğer Split-Screen modundaysak:
+   - 1. Oyuncunun kamerasının `Viewport Rect` değeri Y ekseninde `H: 0.5` ve `Y: 0.5` (Üst yarı) yapılacak.
+   - 2. Oyuncunun kamerasının değeri `H: 0.5` ve `Y: 0` (Alt yarı) olarak ayarlanacak.
+3. Bu işlemler için yazılacak olan `SplitScreenManager.cs` scripti, ekrandaki oyuncu sayısına göre kameraları dinamik veya yatay/dikey bölecek şekilde modüler tasarlanacak.
 
 ---
 

@@ -5,14 +5,15 @@
 - [x] Unity 6000.3.9f1 sürümü için en uygun multiplayer ağ çözümüne (örn: Netcode for GameObjects (NGO), Mirror, vb.) karar verilmesi. *(FishNet + EOS olarak seçildi)*
 
 ## Aşama 1: Paketlerin ve Altyapının Kurulumu (Networking Setup)
-- [ ] **FishNet Networking** paketinin Unity Package Manager kullanılarak (Git URL ile) projeye indirilmesi ve kurulması.
+- [x] **FishNet Networking** paketinin Unity Package Manager kullanılarak (Git URL ile) projeye indirilmesi ve kurulması.
 - [ ] **Epic Online Services (EOS) SDK** ve **FishyEOS Transport** eklentisinin yüklenip ayarlanması.
-- [ ] Kapsamlı multiplayer testleri yapabilmemiz için Unity Editörüne **ParrelSync** eklentisinin kurulması.
+- [x] Kapsamlı multiplayer testleri yapabilmemiz için Unity Editörüne **ParrelSync** eklentisinin kurulması.
 - [ ] Oyunu yönetecek temel **NetworkManager** prefab'ının oluşturulması ve sahneye (veya kalıcı bir "Bootstrap" sahnesine) yerleştirilmesi.
 
 ## Aşama 2: Temel Arayüz (UI) ve Bağlantı Mantığı
-- [ ] **Main Menu Canvas:** Oyuncunun "Host (Oyunu Kur)" veya "Client (Oyuna Katıl)" diyebileceği basit bir UI yapısı oluşturulması.
-- [ ] **Connection Manager:** Yazılan arayüzdeki butonlara tıklanınca EOS üzerinden bağlantıyı başlatacak ve FishNet'e entegre olacak basit bir C# yöneticisi (`NetworkConnectionManager.cs`) yazılması.
+- [ ] **Main Menu Canvas:** Oyuncunun "Online Bağlan (EOS)", "Yerel Ağda Kur/Bağlan (LAN)" veya "Bölünmüş Ekran (Split-Screen)" seçeneklerini seçebileceği gelişmiş bir UI oluşturulması.
+- [ ] **Connection Manager:** Seçilen ağ moduna göre altyapıyı değiştiren C# yöneticisi (`NetworkConnectionManager.cs`). (Örn: LAN seçilirse FishNet'in varsayılan Tugboat transportunu, Online seçilirse FishyEOS transportunu kullanması.)
+- [ ] **Split-Screen Yöneticisi:** Tek ekranda birden fazla oyuncu eklendiğinde (Local Co-Op), ekranı ikiye bölen ve girdileri (Input System) oyunculara göre ayıran bir kamera/arayüz yöneticisi yazılması.
 
 ## Aşama 3: Karakter (Player) Senkronizasyonu ve Akıcılık
 - [ ] **Player Prefab:** 2D ve 3D altyapıyı destekleyecek, ağda kopyalanabilir (spawneable) standart bir oyuncu prefab'ı (Kapsül) yaratılması.
