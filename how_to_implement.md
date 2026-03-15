@@ -10,10 +10,11 @@ Bu doküman, `todo.md` dosyasında listelenen hedeflerin teknik olarak kod ve Un
 1. **İndirme Yöntemi:** FishNet, Unity Asset Store üzerinden veya GitHub'dan indirilerek projeye dahil edilecek. Hızlı versiyon takibi için FishNet'in `manifest.json` dosyasına eklenen GitHub linki üzerinden kurulması tercih edilecek.
 2. **Yapılandırma:** FishNet kurulduğunda menüye `FishNet` adında bir sekme gelir. Buradan FishNet gereksinimlerinin yüklendiği ve hataların giderildiği doğrulanacak.
 
-### Epic Online Services (EOS) & FishyEOS
-1. **Dev Portal:** Epic Developer Portal üzerinden proje oluşturulacak (Client ID, Client Secret, Product ID vb. bilgileri alınacak).
-2. **FishyEOS Transport:** FishNet ile EOS arasındaki köprüyü sağlayan "FishyEOS" paketi GitHub'dan (veya unitypackage olarak) entegre edilecek.
-3. Nakil aracısı (Transport layer), varsayılan `Tugboat` yerine `FishyEOS` olarak seçilip, Epic portalından alınan ID'ler "NetworkManager" prefab'ı üzerindeki transport kısmına yazılacak.
+### Epic Online Services (EOS) & Platform Bağımsızlık (Cross-Platform)
+1. **Dev Portal:** Epic Developer Portal üzerinden proje oluşturulacak (Client ID, Secret vb.).
+2. **FishyEOS Transport:** FishNet ile ağ arasında köprü kuracak bu eklenti ile; Steam, Epic Games, konsollar (PlayStation, Xbox) ve Mobil (iOS/Android) oyuncuları **aynı lobide (Crossplay)** oynayabilecektir.
+3. EOS, oyuncunun Steam veya Epic hesabından bağımsız bir arka plan zarı (Overlay) kurduğu için yayınlanan platform (Storefront) fark etmeksizin tüm oyuncular (P2P veya Relay üzerinden) birbirine bağlanabilir.
+4. **Mobil (Android/iOS) Dengelemesi:** Mobil oyuncular için ekrana dokunmatik kontroller (On-Screen Joystick/Buttons) entegrasyonu Input System üzerinden "Eğer cihaz mobilse dokunmatik UI'ı aç" mantığıyla dahil edilecek.
 
 ### ParrelSync Test Eklentisi
 1. Editörde birden fazla instance açarak host ve client arasındaki senkronizasyonu rahatça görmek için GitHub üzerinden `ParrelSync` Unity'e import edilecek.

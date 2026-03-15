@@ -19,6 +19,7 @@
 - [ ] **Player Prefab:** 2D ve 3D altyapıyı destekleyecek, ağda kopyalanabilir (spawneable) standart bir oyuncu prefab'ı (Kapsül) yaratılması.
 - [ ] **Ağ Bileşenleri:** Oyuncuya `NetworkObject`, `NetworkTransform` ve gerekirse `PredictedRigidbody` gibi FishNet eşitleme scriptlerinin eklenmesi.
 - [ ] **Client-Side Prediction:** Oyuncu hareket kodunu kontrol eden `PlayerController.cs` scriptinin; "Replicate" (Girdiyi İşle) ve "Reconcile" (Sunucuyla Düzelt) metotlarına uygun şekilde yazılması. (Bu sayede 0 gecikme hissi olacak).
+- [ ] **Cross-Platform Girdi (Input):** Klavye/Mouse (PC), Gamepad (Konsol/PC) ve Dokunmatik Ekran (Mobil Joystick) kontrollerinin tek bir PlayerController'a entegre edilmesi.
 
 ## Aşama 4: Modülerleştirme ve Dışa Aktarma (Export)
 - [ ] Tüm oluşturulan yapıların, sahnelerin ve kodların bir klasör (Örn: `NetworkCore/`) altında bağımsız toplanması.

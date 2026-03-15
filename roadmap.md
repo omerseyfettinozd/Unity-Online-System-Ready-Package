@@ -8,9 +8,9 @@
 - **Hedef:** İnternet üzerinden (EOS), Yerel Ağ üzerinden (LAN) veya aynı bilgisayarda bölünmüş ekran (Split-Screen) olarak bağlantı kurulabilmesi. Oyuncu nesnesinin ağ üzerinde oluşturulması ve hareket senkronizasyonu.
 - **Çıktı:** Farklı bağlantı tiplerinde de (Online/LAN/Local) sorunsuz çalışan oyuncu oluşturma (Spawning) ve hareket sistemi.
 
-## Faz 3: Modülerlik ve Gelişmiş Özellikler (Phase 3: Modularity)
-- **Hedef:** Sistemin herhangi bir spesifik oyuna (RPG, FPS vb.) bağlı olmadan, jenerik bir "Ağ Çekirdeği (Network Core)" haline getirilmesi. Objeler arası etkileşim (RPC/SyncVar vb.) için örnek script'ler oluşturulması.
-- **Çıktı:** Tüm modüler ağ scriptlerini içeren temiz bir dosya hiyerarşisi.
+## Faz 3: Çoklu Platform (Cross-Platform) & Modülerlik (Phase 3: Crossplay)
+- **Hedef:** Sistemin Steam, Epic Games Store, Konsollar (Xbox/PS) ve Mobil (iOS/Android) cihazlarda ortak çalışabilmesi. Cihaza göre girdi (Input) yöntemlerinin dinamik değişmesi (Mobilde Joystick, PC'de Klavye/Oyun Kolu).
+- **Çıktı:** Herhangi bir oyun türüne bağlı olmayan, farklı mağaza ve platformlardaki oyuncuları aynı sunucuda buluşturabilen (Crossplay) temiz bir altyapı klasörü.
 
 ## Faz 4: Dışa Aktarma ve Test (Phase 4: Export & Testing)
 - **Hedef:** Oluşturulan bu online sistemin bir `.unitypackage` olarak dışa aktarılması ve sıfırdan oluşturulmuş farklı bir projeye sürükleyip bırakılarak çalışıp çalışmadığının kontrolü.
