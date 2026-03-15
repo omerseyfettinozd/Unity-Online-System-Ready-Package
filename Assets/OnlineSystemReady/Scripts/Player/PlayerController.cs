@@ -63,7 +63,6 @@ namespace OnlineSystemReady.Player
         {
             base.OnStartNetwork();
             base.TimeManager.OnTick += TimeManager_OnTick;
-            base.TimeManager.OnPostTick += TimeManager_OnPostTick;
         }
 
         public override void OnStopNetwork()
@@ -72,7 +71,6 @@ namespace OnlineSystemReady.Player
             if (base.TimeManager != null)
             {
                 base.TimeManager.OnTick -= TimeManager_OnTick;
-                base.TimeManager.OnPostTick -= TimeManager_OnPostTick;
             }
         }
 
@@ -91,18 +89,15 @@ namespace OnlineSystemReady.Player
             }
         }
 
-        private void TimeManager_OnPostTick()
+        public override void CreateReconcile()
         {
-            if (base.IsServer)
+            // Server calls this automatically to generate and send the synchronization data to clients.
+            ReconcileData data = new ReconcileData
             {
-                // Send true position back to the client
-                ReconcileData data = new ReconcileData
-                {
-                    Position = transform.position,
-                    Rotation = transform.rotation
-                };
-                Reconciliation(data, true);
-            }
+                Position = transform.position,
+                Rotation = transform.rotation
+            };
+            Reconciliation(data, true, Channel.Unreliable);
         }
 
         // --- REPLICATE (Movement Logic) --- //
