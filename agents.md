@@ -1,4 +1,4 @@
-# 3D Network Assets - AI Agents Guide
+# Network Assets - AI Agents Guide
 
 ## Proje Amacı (Project Goal)
 Bu projenin amacı, Unity 6000.3.9f1 sürümünde başka bir projeye kolayca aktarılabilecek (export edilebilir) modüler bir online/multiplayer sistem altyapısı kurmaktır.

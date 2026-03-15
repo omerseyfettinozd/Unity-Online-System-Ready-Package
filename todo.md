@@ -1,9 +1,9 @@
 # Yapılacaklar Listesi (To-Do List)
 
 ## Acil Görevler (High Priority)
-- [ ] GitHub deposunun (repository) oluşturulup yerel projeye bağlanması ve ilk sürümün (commit/push) gönderilmesi.
+- [x] GitHub deposunun (repository) oluşturulup yerel projeye bağlanması ve ilk sürümün (commit/push) gönderilmesi.
 - [x] Unity 6000.3.9f1 sürümü için en uygun multiplayer ağ çözümüne (örn: Netcode for GameObjects (NGO), Mirror, vb.) karar verilmesi. *(Araştırma tamamlandı, son karar bekleniyor)*
-- [ ] Boş bir 3D Unity projesi üzerinde gerekli paket kurulumlarının (Networking vb.) yapılması.
+- [ ] Boş bir Unity (2D/3D uyumlu) projesi üzerinde gerekli paket kurulumlarının (Networking vb.) yapılması.
 - [ ] Temel bir `NetworkManager` prefab'ının tasarlanması ve projedeki modüler yapının temellerinin atılması.
 
 ## Orta Öncelikli Görevler (Medium Priority)
