@@ -1,7 +1,10 @@
 {
   "dependencies": {
+    "com.playeveryware.eos": "https://github.com/PlayEveryWare/eos_plugin_for_unity.git#upm-release",
+    "com.firstgearproject.fishnet": "https://github.com/FirstGearGames/FishNet.git",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.collab-proxy": "2.11.3",
+    "com.veriorpies.parrelsync": "https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync",
     "com.unity.ide.rider": "3.0.39",
     "com.unity.ide.visualstudio": "2.0.26",
     "com.unity.inputsystem": "1.18.0",
