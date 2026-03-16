@@ -50,11 +50,31 @@ namespace OnlineSystemReady.Player
         {
             if (base.IsOwner)
             {
-                // In Phase 3 implementation, Unity's new Input System will feed this.
-                // Fallback basic input reading for testing purposes:
+                // Reading from Unity's new Input System
+                // Assumes there's an active Input Action Map that logs Vector2 to a public/static method or component
+                // For now, testing with direct active InputSystem device reading or simplified wrapper
+                
+                // Note: We need a reliable way to get Vector2 from the Input System without hardcoding references.
+                // Creating a fallback/temporary wrapper for Cross-platform reading.
+#if ENABLE_INPUT_SYSTEM
+                if (UnityEngine.InputSystem.Gamepad.current != null)
+                {
+                    _currentMoveInput = UnityEngine.InputSystem.Gamepad.current.leftStick.ReadValue();
+                }
+                else if (UnityEngine.InputSystem.Keyboard.current != null)
+                {
+                    float h = 0f; float v = 0f;
+                    if (UnityEngine.InputSystem.Keyboard.current.wKey.isPressed || UnityEngine.InputSystem.Keyboard.current.upArrowKey.isPressed) v += 1f;
+                    if (UnityEngine.InputSystem.Keyboard.current.sKey.isPressed || UnityEngine.InputSystem.Keyboard.current.downArrowKey.isPressed) v -= 1f;
+                    if (UnityEngine.InputSystem.Keyboard.current.dKey.isPressed || UnityEngine.InputSystem.Keyboard.current.rightArrowKey.isPressed) h += 1f;
+                    if (UnityEngine.InputSystem.Keyboard.current.aKey.isPressed || UnityEngine.InputSystem.Keyboard.current.leftArrowKey.isPressed) h -= 1f;
+                    _currentMoveInput = new Vector2(h, v).normalized;
+                }
+#else
                 float h = Input.GetAxisRaw("Horizontal");
                 float v = Input.GetAxisRaw("Vertical");
                 _currentMoveInput = new Vector2(h, v).normalized;
+#endif
             }
         }
 
