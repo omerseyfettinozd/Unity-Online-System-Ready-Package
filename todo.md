@@ -6,7 +6,7 @@
 
 ## Aşama 1: Paketlerin ve Altyapının Kurulumu (Networking Setup)
 - [x] **FishNet Networking** paketinin Unity Package Manager kullanılarak (Git URL ile) projeye indirilmesi ve kurulması.
-- [ ] **Epic Online Services (EOS) SDK** ve **FishyEOS Transport** eklentisinin yüklenip ayarlanması.
+- [x] **Epic Online Services (EOS) SDK** ve **FishyEOS Transport** eklentisinin yüklenip ayarlanması. *(EOS Plugin v6.0.2, FishyEOS v0.0.6 kuruldu; Developer Portal credential'ları Unity'ye girildi)*
 - [x] Kapsamlı multiplayer testleri yapabilmemiz için Unity Editörüne **ParrelSync** eklentisinin kurulması.
 - [ ] Oyunu yönetecek temel **NetworkManager** prefab'ının oluşturulması ve sahneye (veya kalıcı bir "Bootstrap" sahnesine) yerleştirilmesi.
 

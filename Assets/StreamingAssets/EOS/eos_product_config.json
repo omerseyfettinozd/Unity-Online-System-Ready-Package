@@ -1,0 +1,38 @@
+{
+  "ProductName": "NetworkAssetsTest",
+  "ProductId": "20c95c3d36144651a020e5593b8e93ab",
+  "ProductVersion": "1.0.0",
+  "imported": true,
+  "Clients": [
+    {
+      "Value": {
+        "ClientId": "xyza78915UvXqrdWsq5KFQ7lIdEyZ0Kn",
+        "ClientSecret": "H+Lp9wYMrbjwR6u3iYrX/dB872vuiE3TC34oxDYSYHM",
+        "EncryptionKey": "746D6DE8E5EF4C92758343A810A6488AFE2FEE5B7AE170A5C3AABF0A2FED127C"
+      },
+      "Name": "Client"
+    }
+  ],
+  "Environments": {
+    "Deployments": [
+      {
+        "Value": {
+          "SandboxId": {
+            "Value": "5425d1b4e1d04f73ba4ab19e92fa4fc6"
+          },
+          "DeploymentId": "f5b040a214854cad9e64c2660aca03c4"
+        },
+        "Name": "Deployment"
+      }
+    ],
+    "Sandboxes": [
+      {
+        "Value": {
+          "Value": "5425d1b4e1d04f73ba4ab19e92fa4fc6"
+        },
+        "Name": "Sandbox"
+      }
+    ]
+  },
+  "schemaVersion": "1.0"
+}
