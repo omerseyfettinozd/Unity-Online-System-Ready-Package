@@ -1,4 +1,4 @@
-# Detaylı Uygulama Rehberi (Implementation Guide)
+                  # Detaylı Uygulama Rehberi (Implementation Guide)
 
 Bu doküman, `todo.md` dosyasında listelenen hedeflerin teknik olarak kod ve Unity Editor bazında *nasıl* uygulanacağını adım adım detaylandırmaktadır. Bu rehber AI ajanlarının ve geliştiricinin her görev için referans alacağı mimari kılavuzdur.
 

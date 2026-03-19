@@ -83,6 +83,7 @@ namespace OnlineSystemReady.Player
         {
             base.OnStartNetwork();
             base.TimeManager.OnTick += TimeManager_OnTick;
+            base.TimeManager.OnPostTick += TimeManager_OnPostTick;
         }
 
         public override void OnStopNetwork()
@@ -91,6 +92,7 @@ namespace OnlineSystemReady.Player
             if (base.TimeManager != null)
             {
                 base.TimeManager.OnTick -= TimeManager_OnTick;
+                base.TimeManager.OnPostTick -= TimeManager_OnPostTick;
             }
         }
 
@@ -102,11 +104,28 @@ namespace OnlineSystemReady.Player
                 MoveData data = new MoveData { MoveInput = _currentMoveInput };
                 Move(data); // Send input to server & predict locally
             }
+            if (base.IsServerStarted)
+            {
+                Move(default); // Server unspools and executes inputs
+            }
+        }
+
+        private void TimeManager_OnPostTick()
+        {
+            if (base.IsServerStarted)
+            {
+                // Server sends the true state back to clients to correct them
+                ReconcileData data = new ReconcileData
+                {
+                    Position = transform.position,
+                    Rotation = transform.rotation
+                };
+                Reconciliation(data, Channel.Unreliable);
+            }
         }
 
         public override void CreateReconcile()
         {
-            // Server calls this automatically to generate and send the synchronization data to clients.
             ReconcileData data = new ReconcileData
             {
                 Position = transform.position,

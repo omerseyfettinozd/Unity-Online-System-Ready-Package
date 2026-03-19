@@ -1,15 +1,16 @@
 using UnityEngine;
-using TMPro; // TextMeshPro for modern Unity UI
+using TMPro; // TextMeshPro
 using OnlineSystemReady.Core;
 
 namespace OnlineSystemReady.UI
 {
     /// <summary>
     /// Simple UI Manager to trigger the network connections.
+    /// Also includes an OnGUI fallback for instant testing without Canvas setup.
     /// </summary>
     public class MainMenuManager : MonoBehaviour
     {
-        [Header("UI Panels")]
+        [Header("UI Panels (Optional for tests)")]
         public GameObject mainMenuPanel;
         public GameObject lanPanel;
         public GameObject eosPanel;
@@ -24,16 +25,15 @@ namespace OnlineSystemReady.UI
 
         public void ShowMainMenu()
         {
-            mainMenuPanel.SetActive(true);
-            lanPanel.SetActive(false);
-            eosPanel.SetActive(false);
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+            if (lanPanel != null) lanPanel.SetActive(false);
+            if (eosPanel != null) eosPanel.SetActive(false);
         }
 
-        // ---------- LAN ----------
         public void ShowLANPanel()
         {
-            mainMenuPanel.SetActive(false);
-            lanPanel.SetActive(true);
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+            if (lanPanel != null) lanPanel.SetActive(true);
         }
 
         public void OnLANHostClicked()
@@ -53,37 +53,41 @@ namespace OnlineSystemReady.UI
             HideAllPanels();
         }
 
-        // ---------- EOS ----------
-        public void ShowEOSPanel()
-        {
-            mainMenuPanel.SetActive(false);
-            eosPanel.SetActive(true);
-        }
-
-        public void OnEOSHostClicked()
-        {
-            NetworkConnectionManager.Instance.StartOnlineHost();
-            HideAllPanels();
-        }
-
-        public void OnEOSClientClicked()
-        {
-            NetworkConnectionManager.Instance.StartOnlineClient();
-            HideAllPanels();
-        }
-
-        // ---------- SPLIT SCREEN ----------
-        public void OnSplitScreenClicked()
-        {
-            NetworkConnectionManager.Instance.StartSplitScreen();
-            HideAllPanels();
-        }
-
         private void HideAllPanels()
         {
-            mainMenuPanel.SetActive(false);
-            lanPanel.SetActive(false);
-            eosPanel.SetActive(false);
+            if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+            if (lanPanel != null) lanPanel.SetActive(false);
+            if (eosPanel != null) eosPanel.SetActive(false);
+        }
+
+        // --- OnGUI Fallback (Eğer UI Canvas atanmamışsa ekrana otomatik menü çizer) ---
+        private void OnGUI()
+        {
+            // Eğer Inspector'dan Canvas UI bağlandıysa bu test menüsünü çizme
+            if (mainMenuPanel != null && mainMenuPanel.activeSelf) return;
+
+            // Eğer bağlantı kurulduysa HUD'u gizle
+            if (FishNet.InstanceFinder.ClientManager != null && FishNet.InstanceFinder.ClientManager.Started) return;
+            if (FishNet.InstanceFinder.ServerManager != null && FishNet.InstanceFinder.ServerManager.Started) return;
+
+            GUILayout.BeginArea(new Rect(10, 10, 200, 300), GUI.skin.box);
+            GUILayout.Label("Network Test Menu");
+
+            if (GUILayout.Button("LAN - Host (Sunucu)"))
+            {
+                OnLANHostClicked();
+            }
+            if (GUILayout.Button("LAN - Client (İstemci)"))
+            {
+                OnLANClientClicked();
+            }
+            if (GUILayout.Button("Local Split-Screen"))
+            {
+                NetworkConnectionManager.Instance.StartSplitScreen();
+                HideAllPanels();
+            }
+
+            GUILayout.EndArea();
         }
     }
 }
