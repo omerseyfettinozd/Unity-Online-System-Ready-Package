@@ -40,14 +40,35 @@ namespace OnlineSystemReady.Player
         private CharacterController _characterController;
         private Vector2 _currentMoveInput;
 
+        [Header("Smoothing (Host Jitter Fix)")]
+        [Tooltip("Sadece Host ekranındaki titremeyi gidermek için Visuals objesini buraya atayın.")]
+        public Transform visuals;
+        private bool _isHostSmoothed = false;
+
         private void Awake()
         {
             _characterController = GetComponent<CharacterController>();
         }
 
-        // --- INPUT READING (For all platforms: PC, Mobile, Console) --- //
+        private void OnDestroy()
+        {
+            if (visuals != null && _isHostSmoothed)
+            {
+                Destroy(visuals.gameObject);
+            }
+        }
+
+        // --- INPUT READING & HOST SMOOTHING --- //
         private void Update()
         {
+            // Host ekranında Client'in süzülerek (pürüzsüz) kaymasını sağlayan Slerp Süzgeci
+            if (_isHostSmoothed && visuals != null)
+            {
+                visuals.position = Vector3.Lerp(visuals.position, transform.position, Time.deltaTime * 25f);
+                visuals.rotation = Quaternion.Slerp(visuals.rotation, transform.rotation, Time.deltaTime * 25f);
+            }
+
+
             if (base.IsOwner)
             {
                 // Reading from Unity's new Input System
@@ -84,6 +105,13 @@ namespace OnlineSystemReady.Player
             base.OnStartNetwork();
             base.TimeManager.OnTick += TimeManager_OnTick;
             base.TimeManager.OnPostTick += TimeManager_OnPostTick;
+
+            // Host Jitter Fix: Eğer Sunucu isek ve obje bizim değilse görseli bedenden ayır
+            if (base.IsServerStarted && !base.Owner.IsLocalClient && visuals != null)
+            {
+                visuals.SetParent(null);
+                _isHostSmoothed = true;
+            }
         }
 
         public override void OnStopNetwork()

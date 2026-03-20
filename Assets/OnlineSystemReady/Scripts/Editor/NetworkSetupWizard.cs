@@ -36,7 +36,7 @@ namespace OnlineSystemReady.Editor
 
             playerObj.AddComponent<NetworkObject>();
             NetworkTransform nt = playerObj.AddComponent<NetworkTransform>();
-            playerObj.AddComponent<PlayerController>();
+            PlayerController pc = playerObj.AddComponent<PlayerController>();
 
             // Görsel (Visual) Objenin Oluşturulması ve Ayrıştırılması (Jitter Fix)
             GameObject visualObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -44,6 +44,9 @@ namespace OnlineSystemReady.Editor
             DestroyImmediate(visualObj.GetComponent<Collider>()); // Fizik çarpışmaları ana bedende işlenir
             visualObj.transform.SetParent(playerObj.transform);
             visualObj.transform.localPosition = Vector3.zero;
+
+            // Host Jitter Fix: Visual Objesini Kodla PlayerController'a Bağla
+            pc.visuals = visualObj.transform;
 
             // NetworkTransform'a Görsel Objeyi (GraphicalObject) Tanıtma
             // FishNet Sürüm Farklılıklarına Karşı Güvenli SerializedObject Ataması
@@ -74,6 +77,15 @@ namespace OnlineSystemReady.Editor
 
             SplitScreenManager splitManager = nmObj.AddComponent<SplitScreenManager>();
             connManager.splitScreenManager = splitManager;
+
+            // Arka planda test butonlarını (HUD) çizen UI yöneticisini de otomatik ekle
+            nmObj.AddComponent<OnlineSystemReady.UI.MainMenuManager>();
+
+            // LAN (Yerel Ağ) Matchmaking ve Broadcast yöneticisi
+            nmObj.AddComponent<OnlineSystemReady.Core.LANMatchmakingManager>();
+
+            // EOS (Epic Games) Matchmaking yöneticisini ekle
+            nmObj.AddComponent<OnlineSystemReady.Core.EOSMatchmakingManager>();
 
             // FishyEOS Eklentisini Otomatik Bulup Ekleme (Varsa)
             System.Type eosType = null;
