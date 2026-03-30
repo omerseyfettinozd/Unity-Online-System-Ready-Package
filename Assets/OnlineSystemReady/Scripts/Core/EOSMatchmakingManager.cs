@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Epic.OnlineServices;
 using Epic.OnlineServices.Lobby;
@@ -21,27 +22,104 @@ namespace OnlineSystemReady.Core
         public string currentStatus = "Bekleniyor...";
         public string currentRoomCode = "";
 
+        /// <summary>
+        /// DeviceId reset işlemi sadece bir kez yapılır (clone başına).
+        /// </summary>
+        private bool _deviceIdResetDone = false;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+
+            // Güvenlik Kamerası: Epic Games arka plan çekirdeği (EOSManager) sahnede var mı? Yoksa zorla ekle!
+            if (FindObjectOfType<PlayEveryWare.EpicOnlineServices.EOSManager>() == null)
+            {
+                gameObject.AddComponent<PlayEveryWare.EpicOnlineServices.EOSManager>();
+            }
+        }
+
+        // --- GİRİŞ (Auth) / Yeni Cihaz Kaydı ---
+        /// <summary>
+        /// ParrelSync clone'da DeviceId sıfırladıktan sonra EOS Connect'e giriş yapar.
+        /// Clone tespiti yapılmazsa doğrudan giriş yapar.
+        /// </summary>
+        private IEnumerator LoginToEOSCoroutine(System.Action onSuccess)
+        {
+            // ParrelSync clone'da DeviceId sıfırla (farklı ProductUserId almak için)
+            if (ParrelSyncEOSHelper.IsClone())
+            {
+                Debug.Log("[EOSMatchmaking] ParrelSync clone tespit edildi, DeviceId sıfırlanıyor...");
+                yield return ParrelSyncEOSHelper.DeleteAndRecreateDeviceId();
+            }
+
+            // Normal EOS giriş akışı
+            currentStatus = "EOS Giriş Yapılıyor...";
+            string playerName = "Player_" + Random.Range(100, 999);
+
+            bool loginDone = false;
+            EOSManager.Instance.StartConnectLoginWithDeviceToken(playerName, (loginInfo) => 
+            {
+                if (loginInfo.ResultCode == Result.Success) 
+                {
+                    _localUserId = loginInfo.LocalUserId;
+                    _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
+                    loginDone = true;
+                    onSuccess?.Invoke();
+                }
+                else if (loginInfo.ResultCode == Result.InvalidUser || loginInfo.ResultCode == Result.NotFound)
+                {
+                    currentStatus = "Yeni Cihaz Kaydı Açılıyor...";
+                    var connectInterface = EOSManager.Instance.GetEOSPlatformInterface().GetConnectInterface();
+                    var createOptions = new Epic.OnlineServices.Connect.CreateDeviceIdOptions() { DeviceModel = SystemInfo.deviceModel };
+                    
+                    connectInterface.CreateDeviceId(ref createOptions, null, (ref Epic.OnlineServices.Connect.CreateDeviceIdCallbackInfo createInfo) => 
+                    {
+                        if (createInfo.ResultCode == Result.Success)
+                        {
+                            currentStatus = "Kayıt Başarılı, Giriş Bekleniyor...";
+                            // Kayıt başarılı, tekrar giriş isteği yolluyoruz
+                            EOSManager.Instance.StartConnectLoginWithDeviceToken(playerName, (retryInfo) => 
+                            {
+                                if (retryInfo.ResultCode == Result.Success)
+                                {
+                                    _localUserId = retryInfo.LocalUserId;
+                                    _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
+                                    onSuccess?.Invoke();
+                                }
+                                else
+                                {
+                                    currentStatus = "Giriş Başarısız (Tekrar): " + retryInfo.ResultCode;
+                                }
+                                loginDone = true;
+                            });
+                        }
+                        else
+                        {
+                            currentStatus = "Cihaz Kaydı Başarısız: " + createInfo.ResultCode;
+                            loginDone = true;
+                        }
+                    });
+                }
+                else
+                {
+                    currentStatus = "Giriş Başarısız: " + loginInfo.ResultCode;
+                    loginDone = true;
+                }
+            });
+
+            // Giriş tamamlanana kadar bekle (coroutine bağlamında)
+            while (!loginDone)
+                yield return null;
         }
 
         // --- HOST (Oda Kurucu) ---
         public void StartHostEOS()
         {
-            currentStatus = "EOS Giriş Yapılıyor...";
-            // Cihaza özel anonim bir Epic hesabı açarak giriş yapar
-            EOSManager.Instance.StartConnectLoginWithDeviceToken("Player_" + Random.Range(100,999), (loginInfo) => 
+            StartCoroutine(LoginToEOSCoroutine(() => 
             {
-                if (loginInfo.ResultCode != Result.Success) {
-                    currentStatus = "Giriş Başarısız: " + loginInfo.ResultCode;
-                    return;
-                }
-                _localUserId = loginInfo.LocalUserId;
-                _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
                 CreateLobby();
-            });
+            }));
         }
 
         private void CreateLobby()
@@ -67,6 +145,9 @@ namespace OnlineSystemReady.Core
                 // --- 6 Haneli Oda Kodu Belirleme ---
                 string roomCode = Random.Range(100000, 999999).ToString();
                 currentRoomCode = roomCode;
+
+                Debug.Log("[EOSMatchmaking] İnternet (Epic Games) Odası Başarıyla Kuruldu!");
+                Debug.Log("<color=green>--- BİRİNCİL EOS DAVET KODU: " + roomCode + " ---</color>");
                 
                 var attrData = new AttributeData() { Key = "RoomCode", Value = roomCode };
                 var modOptions = new UpdateLobbyModificationOptions() { LobbyId = _currentLobbyId, LocalUserId = _localUserId };
@@ -101,17 +182,10 @@ namespace OnlineSystemReady.Core
                 return;
             }
 
-            currentStatus = "EOS Giriş Yapılıyor...";
-            EOSManager.Instance.StartConnectLoginWithDeviceToken("Player_" + Random.Range(100,999), (loginInfo) => 
+            StartCoroutine(LoginToEOSCoroutine(() => 
             {
-                if (loginInfo.ResultCode != Result.Success) {
-                    currentStatus = "Giriş Başarısız: " + loginInfo.ResultCode;
-                    return;
-                }
-                _localUserId = loginInfo.LocalUserId;
-                _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
                 SearchLobby(roomCode);
-            });
+            }));
         }
 
         private void SearchLobby(string roomCode)

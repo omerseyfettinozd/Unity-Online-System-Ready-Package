@@ -1,7 +1,9 @@
+using System.Collections;
 using UnityEngine;
 using FishNet;
 using FishNet.Transporting;
 using FishNet.Transporting.Tugboat;
+using System.Reflection;
 
 namespace OnlineSystemReady.Core
 {
@@ -22,10 +24,63 @@ namespace OnlineSystemReady.Core
         [Header("Managers")]
         public SplitScreenManager splitScreenManager;
 
+        /// <summary>
+        /// DeviceId reset işlemi sadece bir kez yapılır (clone başına).
+        /// </summary>
+        private bool _deviceIdResetDone = false;
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+
+            // Inspector'da elle bağlanmadıysa, sahnedeki bileşenleri otomatik bul
+            if (lanTransport == null)
+            {
+                lanTransport = FindObjectOfType<Tugboat>();
+                if (lanTransport == null)
+                {
+                    // Tugboat da yoksa oluştur
+                    lanTransport = gameObject.AddComponent<Tugboat>();
+                }
+                Debug.Log("[Network] Tugboat (LAN) transport otomatik bulundu/oluşturuldu.");
+            }
+
+            if (eosTransport == null)
+            {
+                // Önce sahnede ara
+                foreach (var transport in FindObjectsOfType<Transport>())
+                {
+                    if (transport.GetType().Name.Contains("FishyEOS"))
+                    {
+                        eosTransport = transport;
+                        Debug.Log("[Network] FishyEOS (Online) transport sahnede bulundu.");
+                        break;
+                    }
+                }
+
+                // Sahnede yoksa, Reflection ile zorla oluştur
+                if (eosTransport == null)
+                {
+                    System.Type fishyEOSType = null;
+                    foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        fishyEOSType = asm.GetType("FishNet.Transporting.FishyEOSPlugin.FishyEOS");
+                        if (fishyEOSType != null) break;
+                    }
+
+                    if (fishyEOSType != null)
+                    {
+                        var comp = gameObject.AddComponent(fishyEOSType);
+                        eosTransport = comp as Transport;
+                        Debug.Log("[Network] FishyEOS (Online) transport dinamik olarak oluşturuldu!");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[Network] FishyEOS paketi projede bulunamadı. Online mod çalışmayacak.");
+                    }
+                }
+            }
         }
 
         public void StartLANHost()
@@ -51,6 +106,14 @@ namespace OnlineSystemReady.Core
                 Debug.LogError("[Network] EOS Transport is missing! Please assign it in the inspector.");
                 return;
             }
+            StartCoroutine(StartOnlineHostCoroutine());
+        }
+
+        private IEnumerator StartOnlineHostCoroutine()
+        {
+            // ParrelSync clone'da DeviceId sıfırla (farklı ProductUserId almak için)
+            yield return EnsureUniqueDeviceId();
+
             Debug.Log("[Network] Starting Online Server via Epic Online Services...");
             SetTransport(eosTransport);
             InstanceFinder.ServerManager.StartConnection();
@@ -64,9 +127,31 @@ namespace OnlineSystemReady.Core
                 Debug.LogError("[Network] EOS Transport is missing! Please assign it in the inspector.");
                 return;
             }
+            StartCoroutine(StartOnlineClientCoroutine());
+        }
+
+        private IEnumerator StartOnlineClientCoroutine()
+        {
+            // ParrelSync clone'da DeviceId sıfırla (farklı ProductUserId almak için)
+            yield return EnsureUniqueDeviceId();
+
             Debug.Log("[Network] Searching for Online EOS Host...");
             SetTransport(eosTransport);
             InstanceFinder.ClientManager.StartConnection();
+        }
+
+        /// <summary>
+        /// ParrelSync clone'da çalışıyorsak, eski DeviceId'yi silip yenisini oluşturur.
+        /// Bu sayede her clone farklı bir ProductUserId alır ve EOS P2P düzgün çalışır.
+        /// Sadece bir kez çalışır (session başına).
+        /// </summary>
+        private IEnumerator EnsureUniqueDeviceId()
+        {
+            if (ParrelSyncEOSHelper.IsClone())
+            {
+                Debug.Log("[Network] ParrelSync clone tespit edildi, DeviceId sıfırlanıyor...");
+                yield return ParrelSyncEOSHelper.DeleteAndRecreateDeviceId();
+            }
         }
 
         public void StartSplitScreen()
@@ -84,12 +169,66 @@ namespace OnlineSystemReady.Core
             }
         }
 
+        /// <summary>
+        /// Runtime'da transport değiştirirken FishNet'in tüm event pipeline'ını
+        /// eski transport'tan çıkarıp yeni transport'a bağlar.
+        /// 
+        /// FishNet V4'te ServerManager ve ClientManager, transport seviyesindeki
+        /// event'lere (OnServerReceivedData, OnRemoteConnectionState, OnClientReceivedData vb.)
+        /// abone olur. Bu abonelikler doğrudan Transport nesnesine bağlıdır.
+        /// Transport değiştirildiğinde eski abonelikler kaldırılıp yenileri eklenmezse
+        /// yeni transport'un event'leri işlenmez ve karakter spawn olmaz.
+        /// </summary>
         private void SetTransport(Transport newTransport)
         {
-            if (newTransport != null && InstanceFinder.TransportManager != null)
+            if (newTransport == null || InstanceFinder.TransportManager == null) return;
+
+            var tm = InstanceFinder.TransportManager;
+            var nm = InstanceFinder.NetworkManager;
+
+            // Zaten aynı transport aktifse bir şey yapma
+            if (tm.Transport == newTransport) return;
+
+            // 1) ServerManager: Eski transport'tan event aboneliklerini kaldır
+            var serverSubMethod = nm.ServerManager.GetType().GetMethod(
+                "SubscribeToTransport",
+                BindingFlags.NonPublic | BindingFlags.Instance
+            );
+            if (serverSubMethod != null)
             {
-                InstanceFinder.TransportManager.Transport = newTransport;
+                serverSubMethod.Invoke(nm.ServerManager, new object[] { false }); // Unsubscribe
             }
+
+            // 2) ClientManager: Eski transport'tan event aboneliklerini kaldır
+            var clientSubMethod = nm.ClientManager.GetType().GetMethod(
+                "SubscribeToEvents",
+                BindingFlags.NonPublic | BindingFlags.Instance
+            );
+            if (clientSubMethod != null)
+            {
+                clientSubMethod.Invoke(nm.ClientManager, new object[] { false }); // Unsubscribe
+            }
+
+            // 3) Transport referansını değiştir
+            tm.Transport = newTransport;
+
+            // 4) Yeni transport'u Initialize et (peer'larını hazırlar)
+            newTransport.Initialize(nm, 0);
+
+            // 5) ServerManager: Yeni transport'a event aboneliklerini ekle
+            if (serverSubMethod != null)
+            {
+                serverSubMethod.Invoke(nm.ServerManager, new object[] { true }); // Subscribe
+            }
+
+            // 6) ClientManager: Yeni transport'a event aboneliklerini ekle
+            if (clientSubMethod != null)
+            {
+                clientSubMethod.Invoke(nm.ClientManager, new object[] { true }); // Subscribe
+            }
+
+            Debug.Log("[Network] Transport değiştirildi: " + newTransport.GetType().Name);
         }
     }
 }
+

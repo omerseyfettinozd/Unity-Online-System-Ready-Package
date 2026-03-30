@@ -63,6 +63,9 @@ namespace OnlineSystemReady.Core
             _myHostCode = UnityEngine.Random.Range(100000, 999999).ToString();
             currentRoomCode = _myHostCode;
             currentStatus = "LAN Odası Kuruldu! Kod: " + currentRoomCode;
+            
+            Debug.Log("[LANMatchmaking] Yerel Ağ (LAN) Odası Kuruldu!");
+            Debug.Log("<color=cyan>--- BİRİNCİL LAN DAVET KODU: " + _myHostCode + " ---</color>");
 
             // FishNet Server'ı başlat
             NetworkConnectionManager.Instance.StartLANHost();

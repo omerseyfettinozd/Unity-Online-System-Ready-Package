@@ -11,3 +11,7 @@
 
 ## Neredeyse Biten (Uzun Vadeli) Görevler
 - [ ] Tam bağımsız, başkasına kopyalandığı an çalışan `.unitypackage` çıktısının (Export) alınması.
+
+## Çözülen Hatalar (Bugs Fixed)
+- [x] **EOS Remote Client Spawning:** ParrelSync clone'larında aynı `ProductUserId` alınması sorunu çözüldü (`ParrelSyncEOSHelper`).
+- [x] **Transport Swap Event Bug:** Çalışma anında LAN'dan EOS'a geçerken FishNet event aboneliklerinin kopması sorunu reflection ile çözüldü (`NetworkConnectionManager.SetTransport`).

@@ -84,6 +84,9 @@ namespace OnlineSystemReady.Editor
             // LAN (Yerel Ağ) Matchmaking ve Broadcast yöneticisi
             nmObj.AddComponent<OnlineSystemReady.Core.LANMatchmakingManager>();
 
+            // EOS Çekirdek (Core) Yöneticisini ekle (Tüm hesaba giriş/çıkış, auth işlemlerini yönetir)
+            nmObj.AddComponent<PlayEveryWare.EpicOnlineServices.EOSManager>();
+
             // EOS (Epic Games) Matchmaking yöneticisini ekle
             nmObj.AddComponent<OnlineSystemReady.Core.EOSMatchmakingManager>();
 
@@ -91,9 +94,7 @@ namespace OnlineSystemReady.Editor
             System.Type eosType = null;
             foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies()) 
             {
-                eosType = asm.GetType("FishNet.Transporting.FishyEOS.FishyEOS");
-                if (eosType != null) break;
-                eosType = asm.GetType("Epic.OnlineServices.FishyEOS");
+                eosType = asm.GetType("FishNet.Transporting.FishyEOSPlugin.FishyEOS");
                 if (eosType != null) break;
             }
 
