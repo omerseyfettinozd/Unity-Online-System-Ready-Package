@@ -22,10 +22,9 @@ namespace OnlineSystemReady.Core
         public string currentStatus = "Bekleniyor...";
         public string currentRoomCode = "";
 
-        /// <summary>
-        /// DeviceId reset işlemi sadece bir kez yapılır (clone başına).
-        /// </summary>
-        private bool _deviceIdResetDone = false;
+        private bool _isLobbyOwner = false;
+
+
 
         private void Awake()
         {
@@ -33,7 +32,7 @@ namespace OnlineSystemReady.Core
             else Destroy(gameObject);
 
             // Güvenlik Kamerası: Epic Games arka plan çekirdeği (EOSManager) sahnede var mı? Yoksa zorla ekle!
-            if (FindObjectOfType<PlayEveryWare.EpicOnlineServices.EOSManager>() == null)
+            if (UnityEngine.Object.FindFirstObjectByType<PlayEveryWare.EpicOnlineServices.EOSManager>() == null)
             {
                 gameObject.AddComponent<PlayEveryWare.EpicOnlineServices.EOSManager>();
             }
@@ -124,6 +123,7 @@ namespace OnlineSystemReady.Core
 
         private void CreateLobby()
         {
+            _isLobbyOwner = true;
             currentStatus = "Oda Kuruluyor...";
             var createOptions = new CreateLobbyOptions()
             {
@@ -225,6 +225,11 @@ namespace OnlineSystemReady.Core
                 
                 string hostIdString = hostAttr?.Data?.Value.AsUtf8;
                 
+                // Lobinin gerçek ID'sini (LeaveLobby yapabilmek için) önbelleğe al
+                var lobbyInfoOptions = new LobbyDetailsCopyInfoOptions();
+                lobbyDetails.CopyInfo(ref lobbyInfoOptions, out LobbyDetailsInfo? lobbyInfo);
+                if (lobbyInfo.HasValue) _currentLobbyId = lobbyInfo.Value.LobbyId;
+
                 // Odaya gir (İsteğe bağlı, zorunlu değil ama takım listesi için eklenebilir)
                 var joinOptions = new JoinLobbyOptions() { LocalUserId = _localUserId, LobbyDetailsHandle = lobbyDetails, PresenceEnabled = false };
                 _lobbyInterface.JoinLobby(ref joinOptions, null, (ref JoinLobbyCallbackInfo joinInfo) => 
@@ -256,6 +261,34 @@ namespace OnlineSystemReady.Core
                 PropertyInfo prop = type.GetProperty("RemoteProductUserId", BindingFlags.Public | BindingFlags.Instance);
                 if (prop != null) prop.SetValue(eosTransport, hostId, null);
             }
+        }
+
+        // --- GRACEFUL DISCONNECT (Lobi Temizliği) ---
+        public void LeaveOrDestroyLobby()
+        {
+            if (_lobbyInterface == null || string.IsNullOrEmpty(_currentLobbyId)) return;
+
+            if (_isLobbyOwner)
+            {
+                var destroyOptions = new DestroyLobbyOptions() { LocalUserId = _localUserId, LobbyId = _currentLobbyId };
+                _lobbyInterface.DestroyLobby(ref destroyOptions, null, (ref DestroyLobbyCallbackInfo info) => 
+                {
+                    Debug.Log("<color=red>[EOSMatchmaking] Lobi başarıyla YIKILDI (Destroy): </color>" + info.ResultCode);
+                });
+            }
+            else
+            {
+                var leaveOptions = new LeaveLobbyOptions() { LocalUserId = _localUserId, LobbyId = _currentLobbyId };
+                _lobbyInterface.LeaveLobby(ref leaveOptions, null, (ref LeaveLobbyCallbackInfo info) => 
+                {
+                    Debug.Log("<color=orange>[EOSMatchmaking] Lobiden başarıyla AYRILINDI (Leave): </color>" + info.ResultCode);
+                });
+            }
+            
+            _currentLobbyId = string.Empty;
+            currentRoomCode = "";
+            _isLobbyOwner = false;
+            currentStatus = "Bağlantı Kesildi (İşlem Tamam).";
         }
     }
 }

@@ -24,10 +24,7 @@ namespace OnlineSystemReady.Core
         [Header("Managers")]
         public SplitScreenManager splitScreenManager;
 
-        /// <summary>
-        /// DeviceId reset işlemi sadece bir kez yapılır (clone başına).
-        /// </summary>
-        private bool _deviceIdResetDone = false;
+
 
         private void Awake()
         {
@@ -37,7 +34,7 @@ namespace OnlineSystemReady.Core
             // Inspector'da elle bağlanmadıysa, sahnedeki bileşenleri otomatik bul
             if (lanTransport == null)
             {
-                lanTransport = FindObjectOfType<Tugboat>();
+                lanTransport = UnityEngine.Object.FindFirstObjectByType<Tugboat>();
                 if (lanTransport == null)
                 {
                     // Tugboat da yoksa oluştur
@@ -49,7 +46,7 @@ namespace OnlineSystemReady.Core
             if (eosTransport == null)
             {
                 // Önce sahnede ara
-                foreach (var transport in FindObjectsOfType<Transport>())
+                foreach (var transport in UnityEngine.Object.FindObjectsByType<Transport>(FindObjectsSortMode.None))
                 {
                     if (transport.GetType().Name.Contains("FishyEOS"))
                     {
@@ -79,6 +76,46 @@ namespace OnlineSystemReady.Core
                     {
                         Debug.LogWarning("[Network] FishyEOS paketi projede bulunamadı. Online mod çalışmayacak.");
                     }
+                }
+            }
+        }
+
+        private void Start()
+        {
+            if (InstanceFinder.ClientManager != null)
+                InstanceFinder.ClientManager.OnClientConnectionState += ClientManager_OnClientConnectionState;
+            if (InstanceFinder.ServerManager != null)
+                InstanceFinder.ServerManager.OnServerConnectionState += ServerManager_OnServerConnectionState;
+        }
+
+        private void OnDestroy()
+        {
+            if (InstanceFinder.ClientManager != null)
+                InstanceFinder.ClientManager.OnClientConnectionState -= ClientManager_OnClientConnectionState;
+            if (InstanceFinder.ServerManager != null)
+                InstanceFinder.ServerManager.OnServerConnectionState -= ServerManager_OnServerConnectionState;
+        }
+
+        private void ClientManager_OnClientConnectionState(ClientConnectionStateArgs args)
+        {
+            if (args.ConnectionState == LocalConnectionState.Stopped)
+            {
+                Debug.Log("<color=orange>[Network] İstemci (Client) bağlantısı Stopped durumuna geçti. Odayı terk ediyoruz...</color>");
+                if (EOSMatchmakingManager.Instance != null && InstanceFinder.TransportManager.Transport == eosTransport)
+                {
+                    EOSMatchmakingManager.Instance.LeaveOrDestroyLobby();
+                }
+            }
+        }
+
+        private void ServerManager_OnServerConnectionState(ServerConnectionStateArgs args)
+        {
+            if (args.ConnectionState == LocalConnectionState.Stopped)
+            {
+                Debug.Log("<color=red>[Network] Sunucu (Server) kapatıldı. Kurduğumuz odayı yıkıyoruz...</color>");
+                if (EOSMatchmakingManager.Instance != null && InstanceFinder.TransportManager.Transport == eosTransport)
+                {
+                    EOSMatchmakingManager.Instance.LeaveOrDestroyLobby();
                 }
             }
         }

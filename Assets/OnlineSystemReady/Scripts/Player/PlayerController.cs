@@ -1,7 +1,9 @@
 using UnityEngine;
 using FishNet.Object;
 using FishNet.Object.Prediction;
+using FishNet.Object.Synchronizing;
 using FishNet.Transporting;
+using FishNet.Connection;
 
 namespace OnlineSystemReady.Player
 {
@@ -45,9 +47,26 @@ namespace OnlineSystemReady.Player
         public Transform visuals;
         private bool _isHostSmoothed = false;
 
+        // Olay Tabanlı (Event-Driven) İsim Senkronizasyonu (Sadece Altyapı - Arayüz(UI) İptal Edildi)
+        public readonly SyncVar<string> _playerName = new SyncVar<string>("Bağlanıyor...");
+
+        private void OnPlayerNameChanged(string oldName, string newName, bool asServer)
+        {
+            // İleride UI eklendiğinde isim senkronizasyonu bu satırda yapılacak.
+            // Örn: nameText.text = newName;
+            // Debug.Log($"[Network] Karakter verisi güncellendi: {newName}");
+        }
+
+        [ServerRpc]
+        public void CmdSetPlayerName(string newName)
+        {
+            _playerName.Value = newName;
+        }
+
         private void Awake()
         {
             _characterController = GetComponent<CharacterController>();
+            _playerName.OnChange += OnPlayerNameChanged;
         }
 
         private void OnDestroy()
@@ -100,11 +119,26 @@ namespace OnlineSystemReady.Player
         }
 
         // --- FISHNET TIMING (Tick System) --- //
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+
+            // Kendi karakterimiz İstemci'de (Client) tam anlamıyla doğduğunda sunucuya ismimizi bildiriyoruz
+            if (base.Owner.IsLocalClient)
+            {
+                string myName = "Player_" + base.Owner.ClientId;
+                CmdSetPlayerName(myName);
+            }
+        }
+
         public override void OnStartNetwork()
         {
             base.OnStartNetwork();
             base.TimeManager.OnTick += TimeManager_OnTick;
             base.TimeManager.OnPostTick += TimeManager_OnPostTick;
+
+            // İleride arayüz (UI) eklendiğinde ilk doğuş okuması burada yapılabilir
+            // Örn: nameText.text = _playerName.Value;
 
             // Host Jitter Fix: Eğer Sunucu isek ve obje bizim değilse görseli bedenden ayır
             if (base.IsServerStarted && !base.Owner.IsLocalClient && visuals != null)
