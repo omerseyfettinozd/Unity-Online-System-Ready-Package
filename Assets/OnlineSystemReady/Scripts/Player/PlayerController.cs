@@ -57,9 +57,22 @@ namespace OnlineSystemReady.Player
             // Debug.Log($"[Network] Karakter verisi güncellendi: {newName}");
         }
 
+        // --- GÜVENLİK (Anti-Spam / Cooldown) Şablonu ---
+        private float _lastNameChangeTime = 0f;
+        private const float NAME_CHANGE_COOLDOWN = 1.0f; // Saniyede maksimum 1 istek
+
         [ServerRpc]
         public void CmdSetPlayerName(string newName)
         {
+            // İstemciden (oyunculardan) gelen istekleri sunucu tarafında süzgeçten (Cooldown) geçiriyoruz.
+            // Bu koruma şablonunu; mermi sıkma, yetenek kullanma gibi sunucuyu yoracak tüm özelliklerde uygulayın.
+            if (Time.time - _lastNameChangeTime < NAME_CHANGE_COOLDOWN)
+            {
+                Debug.LogWarning($"<color=yellow>[Network Security] Player {base.Owner.ClientId} komut spamı yapıyor! İstek sunucu tarafından reddedildi.</color>");
+                return;
+            }
+            _lastNameChangeTime = Time.time;
+
             _playerName.Value = newName;
         }
 

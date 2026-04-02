@@ -17,8 +17,8 @@
 
 ## Gelecek Planları / Temel Paket Ağ Optimizasyonları (Notlar)
 - [x] **Event-Driven Ağ İletişimi:** Verilerin Update içerisinde kontrolü bırakılıp, performans için `[SyncVar(OnChange = nameof(Fonk))]` kanca (hook) metodlarına geçildi. (İlk örneği NameTag için yapıldı).
-- [ ] **Gereksiz Transform İptalleri:** Ağ üzerindeki prefablarda, kullanılmayan Scale (Boyut) ve gereksiz Eksen Rotasyon güncellemeleri FishNet `NetworkTransform` ayarlarından tamamen kapatılıp bant genişliği tasarrufu kitlenecek.
-- [ ] **RPC Spam Koruması:** Sunucu çöküşlerinin (Flood/Spam) önüne geçmek adına `[ServerRpc]` ile gelen tüm girdi/üretim komutlarına minik `Time.time` kaba bekleme süreleri (Cooldown) eklenecek.
+- [x] **Gereksiz Transform İptalleri:** (Paketi kullanan diğer geliştiricilerin farklı konseptlerini sınırlamamak adına vizyoner bir kararla ES geçildi, varsayılan bırakıldı).
+- [x] **RPC Spam Koruması:** Sunucu çöküşlerinin (Flood/Spam) önüne geçmek adına `[ServerRpc]` ile gelen tüm girdi/üretim komutlarına `Time.time` bazlı bekleme süreleri (Cooldown) güvenlik şablonu eklendi.
 ## Paketi Tamamlayacak Temel Vitrin Özellikleri (UI & Lobi)
 - [ ] **Ping ve Bağlantı UI:** Kullanıcı deneyimini güçlendirmek için anlık Ping (ms) gecikme süresinin ekrana yansıtılması.
 - [ ] **Karakter İsim (NameTag) Senk.:** Epic Games üzerindeki kullanıcı adlarının objelerin üstünde (`[SyncVar]`) tüm oyuncularla senkronize olarak görünmesi.
