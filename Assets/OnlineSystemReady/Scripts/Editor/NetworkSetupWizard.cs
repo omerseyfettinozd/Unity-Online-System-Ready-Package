@@ -90,6 +90,9 @@ namespace OnlineSystemReady.Editor
             // EOS (Epic Games) Matchmaking yöneticisini ekle
             nmObj.AddComponent<OnlineSystemReady.Core.EOSMatchmakingManager>();
 
+            // Mobil Kontrol Yöneticisi (Joystick + Platform Algılama)
+            nmObj.AddComponent<OnlineSystemReady.UI.MobileInputManager>();
+
             // FishyEOS Eklentisini Otomatik Bulup Ekleme (Varsa)
             System.Type eosType = null;
             foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies()) 

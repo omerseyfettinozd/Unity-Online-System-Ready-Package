@@ -7,8 +7,8 @@
 - [x] **LAN Koda Katıl (UDP):** Aynı internetteki cihazların IP girmeden 6 haneli numerik kodla birbirini bulması.
 
 ## Gelecek (Orta Vadeli) Görevler
-- [ ] Mobil uyumluluk: Joystick, Touch Area ve Action Butonlarının arayüze eklenmesi.
-- [ ] Mobil girdilerin yeni Unity Input System ile köprülenmesi.
+- [x] Mobil uyumluluk: Joystick, Touch Area ve Action Butonlarının arayüze eklenmesi.
+- [x] Mobil girdilerin yeni Unity Input System ile köprülenmesi.
 
 ## Neredeyse Biten (Uzun Vadeli) Görevler
 - [ ] Tam bağımsız, başkasına kopyalandığı an çalışan `.unitypackage` çıktısının (Export) alınması.

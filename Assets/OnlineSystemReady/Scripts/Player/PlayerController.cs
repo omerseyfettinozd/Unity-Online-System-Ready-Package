@@ -103,17 +103,25 @@ namespace OnlineSystemReady.Player
 
             if (base.IsOwner)
             {
-                // Reading from Unity's new Input System
-                // Assumes there's an active Input Action Map that logs Vector2 to a public/static method or component
-                // For now, testing with direct active InputSystem device reading or simplified wrapper
-                
-                // Note: We need a reliable way to get Vector2 from the Input System without hardcoding references.
-                // Creating a fallback/temporary wrapper for Cross-platform reading.
+                // --- ÇAPRAZ PLATFORM GİRDİ ÖNCELİK SIRASI (Cross-Platform Input Priority) ---
+                // 1) Mobil Joystick (En yüksek öncelik — Mobilde ekrana dokunulunca devreye girer)
+                // 2) Gamepad (Oyun Kolu)
+                // 3) Klavye (Fallback)
+
+                // Öncelik 1: Mobil Sanal Joystick
+                Vector2 joystickInput = UI.MobileJoystick.Input;
+                if (joystickInput.sqrMagnitude > 0.01f)
+                {
+                    _currentMoveInput = joystickInput;
+                }
 #if ENABLE_INPUT_SYSTEM
-                if (UnityEngine.InputSystem.Gamepad.current != null)
+                // Öncelik 2: Gamepad (Oyun Kolu)
+                else if (UnityEngine.InputSystem.Gamepad.current != null &&
+                         UnityEngine.InputSystem.Gamepad.current.leftStick.ReadValue().sqrMagnitude > 0.01f)
                 {
                     _currentMoveInput = UnityEngine.InputSystem.Gamepad.current.leftStick.ReadValue();
                 }
+                // Öncelik 3: Klavye
                 else if (UnityEngine.InputSystem.Keyboard.current != null)
                 {
                     float h = 0f; float v = 0f;
@@ -123,10 +131,18 @@ namespace OnlineSystemReady.Player
                     if (UnityEngine.InputSystem.Keyboard.current.aKey.isPressed || UnityEngine.InputSystem.Keyboard.current.leftArrowKey.isPressed) h -= 1f;
                     _currentMoveInput = new Vector2(h, v).normalized;
                 }
+                else
+                {
+                    _currentMoveInput = Vector2.zero;
+                }
 #else
-                float h = Input.GetAxisRaw("Horizontal");
-                float v = Input.GetAxisRaw("Vertical");
-                _currentMoveInput = new Vector2(h, v).normalized;
+                // Eski Input Manager Fallback (Gamepad ve Klavye birlikte)
+                else
+                {
+                    float h = Input.GetAxisRaw("Horizontal");
+                    float v = Input.GetAxisRaw("Vertical");
+                    _currentMoveInput = new Vector2(h, v).normalized;
+                }
 #endif
             }
         }
