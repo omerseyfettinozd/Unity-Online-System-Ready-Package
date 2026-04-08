@@ -78,6 +78,17 @@ namespace OnlineSystemReady.Core
                     }
                 }
             }
+
+            // SteamAuthManager sahneye otomatik eklensin (Mümkünse)
+            if (SteamAuthManager.Instance == null)
+            {
+                var steamAuthObj = UnityEngine.Object.FindFirstObjectByType<SteamAuthManager>();
+                if (steamAuthObj == null)
+                {
+                    gameObject.AddComponent<SteamAuthManager>();
+                    Debug.Log("[Network] SteamAuthManager bileşeni dinamik olarak oluşturuldu!");
+                }
+            }
         }
 
         private void Start()

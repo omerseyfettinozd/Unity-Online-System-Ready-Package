@@ -140,6 +140,18 @@ namespace OnlineSystemReady.Player
             if (base.Owner.IsLocalClient)
             {
                 string myName = "Player_" + base.Owner.ClientId;
+
+                // Priority 1: Steam Display Name
+                if (Core.SteamAuthManager.Instance != null && !string.IsNullOrEmpty(Core.SteamAuthManager.Instance.SteamDisplayName))
+                {
+                    myName = Core.SteamAuthManager.Instance.SteamDisplayName;
+                }
+                // Priority 2: Epic Games Display Name
+                else if (Core.EOSMatchmakingManager.Instance != null && !string.IsNullOrEmpty(Core.EOSMatchmakingManager.Instance.EpicDisplayName))
+                {
+                    myName = Core.EOSMatchmakingManager.Instance.EpicDisplayName;
+                }
+
                 CmdSetPlayerName(myName);
             }
         }

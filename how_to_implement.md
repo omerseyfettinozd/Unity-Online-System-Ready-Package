@@ -19,6 +19,9 @@ Bu doküman, `todo.md` dosyasında listelenen hedeflerin teknik olarak kod ve Un
 ### ParrelSync Test Eklentisi
 1. Editörde birden fazla instance açarak host ve client arasındaki senkronizasyonu rahatça görmek için GitHub üzerinden `ParrelSync` Unity'e import edilecek.
 
+### Steamworks.NET ve Steam Kimliği Entegrasyonu
+2. (Opsiyonel) Steam oyuncularını EOS ağına "gerçek isimleriyle" sokmak için projenin `manifest.json` dosyasına Steamworks.NET bağımlılığı eklenmelidir. Sonrasında Epic Developer Portal üzerinden Identity Providers sekmesinden Steam App ID'si eklenmelidir. Oluşturulan `SteamAuthManager` scripti Steam kapalıysa ya da projede yoksa otomatik olarak (fallback) anonim EOS DeviceToken yöntemini kullanır.
+
 ### NetworkManager Prefab'ı Tasarımı
 1. Boş bir GameObject oluşturulup adına `NetworkManager` verilecek.
 2. Altına `NetworkManager` scripti eklenecek.

@@ -66,7 +66,7 @@ namespace OnlineSystemReady.UI
             if (FishNet.InstanceFinder.ClientManager != null && FishNet.InstanceFinder.ClientManager.Started) return;
             if (FishNet.InstanceFinder.ServerManager != null && FishNet.InstanceFinder.ServerManager.Started) return;
 
-            GUILayout.BeginArea(new Rect(10, 10, 200, 300), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(10, 10, 250, 450), GUI.skin.box);
             // --- YEREL AĞ (LAN) GUI ---
             GUILayout.Label("--- YEREL AĞ (LAN) ---");
             if (LANMatchmakingManager.Instance != null)
@@ -104,6 +104,29 @@ namespace OnlineSystemReady.UI
             GUILayout.Space(10);
             // --- EPIC ONLINE SERVICES GUI ---
             GUILayout.Label("--- ONLINE (EOS) ---");
+            
+            // Steam durum göstergesi
+            if (SteamAuthManager.Instance != null && SteamAuthManager.Instance.IsSteamAvailable)
+            {
+                GUI.color = Color.green;
+                GUILayout.Label("🎮 Steam: Aktif (" + SteamAuthManager.Instance.SteamDisplayName + ")");
+                GUI.color = Color.white;
+            }
+            else
+            {
+                GUI.color = Color.gray;
+                GUILayout.Label("Steam: Kapalı (Anonim DeviceToken)");
+                GUI.color = Color.white;
+            }
+
+            // Epic Games durum göstergesi
+            if (EOSMatchmakingManager.Instance != null && !string.IsNullOrEmpty(EOSMatchmakingManager.Instance.EpicDisplayName))
+            {
+                GUI.color = Color.cyan;
+                GUILayout.Label("📦 Epic: Aktif (" + EOSMatchmakingManager.Instance.EpicDisplayName + ")");
+                GUI.color = Color.white;
+            }
+
             if (EOSMatchmakingManager.Instance != null)
             {
                 GUILayout.Label("Durum: " + EOSMatchmakingManager.Instance.currentStatus);

@@ -2,6 +2,7 @@
 
 ## Acil (Kısa Vadeli) Görevler
 - [x] **Host Visual Jitter:** Host ekranındaki senkronizasyon titremesinin Slerp ile kusursuz süzülmeye çevrilmesi.
+- [x] **Steam Kimliği ile Giriş:** Steamworks.NET ve EOS Connect ile Steam hesaplarının EOS ağına bağlanabilmesi (Crossplay altyapısı).
 - [x] **Online Koda Katıl (EOS):** Epic Games altyapısı üzerinden 6 haneli numerik kodla oda kurma/bulma.
 - [x] **LAN Koda Katıl (UDP):** Aynı internetteki cihazların IP girmeden 6 haneli numerik kodla birbirini bulması.
 

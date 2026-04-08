@@ -33,6 +33,13 @@
       },
       "hash": "41a4e9529d7c351d805c09c875dca77fd65c4dd5"
     },
+    "com.rlabrecque.steamworks.net": {
+      "version": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a503766637901ac354c9d17aa0f5f822406043f1"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.10",
       "depth": 0,

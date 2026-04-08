@@ -23,6 +23,9 @@ namespace OnlineSystemReady.Core
         public string currentRoomCode = "";
 
         private bool _isLobbyOwner = false;
+        
+        public string EpicDisplayName { get; private set; } = "";
+        private EpicAccountId _localEpicAccountId;
 
 
 
@@ -52,8 +55,42 @@ namespace OnlineSystemReady.Core
                 yield return ParrelSyncEOSHelper.DeleteAndRecreateDeviceId();
             }
 
-            // Normal EOS giriş akışı
-            currentStatus = "EOS Giriş Yapılıyor...";
+            // --- Steam Kimlik Doğrulaması (Eğer açıksa ve varsa) ---
+            if (SteamAuthManager.Instance != null && SteamAuthManager.Instance.IsSteamAvailable)
+            {
+                bool steamDone = false;
+                bool steamSuccess = false;
+                
+                currentStatus = "Steam ile EOS'a Giriş Yapılıyor...";
+                
+                yield return SteamAuthManager.Instance.LoginViaEOS(
+                    (userId) => 
+                    { 
+                        _localUserId = userId; 
+                        steamSuccess = true; 
+                        steamDone = true; 
+                    },
+                    (error) => 
+                    { 
+                        Debug.LogWarning("[EOSMatchmaking] Steam auth başarısız, DeviceToken'a düşülüyor: " + error); 
+                        steamDone = true; 
+                    }
+                );
+                
+                // Steam auth sonlanana kadar bekle
+                while (!steamDone) yield return null;
+                
+                // Eğer Steam başarılırsa, doğrudan lobi arayüzünü alıp devam et (DeviceToken'i es geç)
+                if (steamSuccess)
+                {
+                    _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
+                    onSuccess?.Invoke();
+                    yield break; // Coroutine'i bitir
+                }
+            }
+
+            // Normal EOS giriş akışı (Steam kapalıysa veya hata verdiyse - Fallback)
+            currentStatus = "EOS Giriş Yapılıyor (DeviceToken)...";
             string playerName = "Player_" + Random.Range(100, 999);
 
             bool loginDone = false;
@@ -63,6 +100,10 @@ namespace OnlineSystemReady.Core
                 {
                     _localUserId = loginInfo.LocalUserId;
                     _lobbyInterface = EOSManager.Instance.GetEOSPlatformInterface().GetLobbyInterface();
+                    
+                    // Connect girişi başarılıysa, eğer bir Epic hesabı bağlıysa ismini çekmeye çalış
+                    QueryEpicDisplayName();
+
                     loginDone = true;
                     onSuccess?.Invoke();
                 }
@@ -289,6 +330,49 @@ namespace OnlineSystemReady.Core
             currentRoomCode = "";
             _isLobbyOwner = false;
             currentStatus = "Bağlantı Kesildi (İşlem Tamam).";
+        }
+        // --- EPIC KULLANICI ADI SORGULAMA ---
+        private void QueryEpicDisplayName()
+        {
+            var platformInterface = EOSManager.Instance.GetEOSPlatformInterface();
+            if (platformInterface == null) return;
+
+            _localEpicAccountId = EOSManager.Instance.GetLocalUserId();
+            if (_localEpicAccountId == null || !_localEpicAccountId.IsValid())
+            {
+                Debug.Log("[EOSMatchmaking] Epic Account ID bulunamadı. Anonim devam ediliyor.");
+                return;
+            }
+
+            var userInfoInterface = platformInterface.GetUserInfoInterface();
+            var queryOptions = new Epic.OnlineServices.UserInfo.QueryUserInfoOptions()
+            {
+                LocalUserId = _localEpicAccountId,
+                TargetUserId = _localEpicAccountId
+            };
+
+            userInfoInterface.QueryUserInfo(ref queryOptions, null, (ref Epic.OnlineServices.UserInfo.QueryUserInfoCallbackInfo info) =>
+            {
+                if (info.ResultCode == Result.Success)
+                {
+                    var copyOptions = new Epic.OnlineServices.UserInfo.CopyUserInfoOptions()
+                    {
+                        LocalUserId = _localEpicAccountId,
+                        TargetUserId = _localEpicAccountId
+                    };
+
+                    userInfoInterface.CopyUserInfo(ref copyOptions, out Epic.OnlineServices.UserInfo.UserInfoData? data);
+                    if (data.HasValue)
+                    {
+                        EpicDisplayName = data.Value.DisplayName;
+                        Debug.Log("<color=cyan>[EOSMatchmaking] Hoşgeldin Epic Oyuncusu: " + EpicDisplayName + "</color>");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[EOSMatchmaking] Epic kullanıcı adı sorgulama başarısız: " + info.ResultCode);
+                }
+            });
         }
     }
 }
